@@ -125,3 +125,25 @@ def start_gate_keeper(camera_id):
                         rotation_matrix = cv2.getRotationMatrix2D((h_m / 2, w_m / 2), rotation_degree, 1.0)
                         normal = cv2.warpAffine(normal, rotation_matrix, (h_m, w_m))
 
+                        new_x, new_y, new_w, new_h = new_face = faces = FC.detectMultiScale(
+                            normal,
+                            scaleFactor=2,
+                            minNeighbors=2,
+                            minSize=(30, 30),
+                            flags=cv2.cv.CV_HAAR_SCALE_IMAGE
+                        )[0]
+
+                        new_face_closeup = normal[new_y:new_y + new_h, new_x:new_x + new_w]
+
+                        eigen_prediction = eigen_recognizer.predict(new_face_closeup)
+                        fisher_prediction = fisher_recognizer.predict(new_face_closeup)
+                        lbhp_prediction = lbhp_recognizer.predict(new_face_closeup)
+
+                        # Do something with these predictions
+
+        # End for 'if len(faces) ==  1' condition
+
+        # Terminate loop if user presses 'q'
+        if cv2.waitKey(1) & 0xFF == ord('q'):
+            print('Quitting')
+            break
