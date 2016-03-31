@@ -51,3 +51,37 @@ def start_gate_keeper(camera_id):
             face = faces[0]
 
             x, y, w, h = face
+
+            close_up_face = face[y:y + h, x:x + h]
+            left_eyes = LEC.detectMultiScale(
+                close_up_face,
+                scaleFactor=1.6,
+                minNeighbors=4,
+                minSize=(5, 5)
+            )
+            right_eyes = REC.detectMultiScale(
+                close_up_face,
+                scaleFactor=1.6,
+                minNeighbors=4,
+                minSize=(5, 5)
+            )
+
+        if len(left_eyes) > 0 and len(right_eyes) > 0:
+
+            # Identify right and left eyes
+            left_eye_x_center = left_eyes[0][0] + left_eyes[0][2] / 2
+            left_eye_y_center = left_eyes[0][1] + left_eyes[0][3] / 2
+
+            right_eye_x_center = right_eyes[0][0] + right_eyes[0][2] / 2
+            right_eye_y_center = right_eyes[0][1] + right_eyes[0][3] / 2
+
+            for (m, n, o, p) in left_eyes[1:]:
+                if m + o / 2 > left_eye_x_center:
+                    left_eye_x_center = m + o / 2
+                    left_eye_y_center = n + p / 2
+
+            for (m, n, o, p) in right_eyes[1:]:
+                if m + o / 2 < right_eye_x_center:
+                    right_eye_x_center = m + o / 2
+                    right_eye_y_center = n + p / 2
+
