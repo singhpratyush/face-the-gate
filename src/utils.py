@@ -1,3 +1,5 @@
+import math
+
 import cv2
 
 
@@ -66,22 +68,60 @@ def start_gate_keeper(camera_id):
                 minSize=(5, 5)
             )
 
-        if len(left_eyes) > 0 and len(right_eyes) > 0:
+            if len(left_eyes) > 0 and len(right_eyes) > 0:
 
-            # Identify right and left eyes
-            left_eye_x_center = left_eyes[0][0] + left_eyes[0][2] / 2
-            left_eye_y_center = left_eyes[0][1] + left_eyes[0][3] / 2
+                # Identify right and left eyes
+                left_eye_x_center = left_eyes[0][0] + left_eyes[0][2] / 2
+                left_eye_y_center = left_eyes[0][1] + left_eyes[0][3] / 2
 
-            right_eye_x_center = right_eyes[0][0] + right_eyes[0][2] / 2
-            right_eye_y_center = right_eyes[0][1] + right_eyes[0][3] / 2
+                right_eye_x_center = right_eyes[0][0] + right_eyes[0][2] / 2
+                right_eye_y_center = right_eyes[0][1] + right_eyes[0][3] / 2
 
-            for (m, n, o, p) in left_eyes[1:]:
-                if m + o / 2 > left_eye_x_center:
-                    left_eye_x_center = m + o / 2
-                    left_eye_y_center = n + p / 2
+                for (m, n, o, p) in left_eyes[1:]:
+                    if m + o / 2 > left_eye_x_center:
+                        left_eye_x_center = m + o / 2
+                        left_eye_y_center = n + p / 2
 
-            for (m, n, o, p) in right_eyes[1:]:
-                if m + o / 2 < right_eye_x_center:
-                    right_eye_x_center = m + o / 2
-                    right_eye_y_center = n + p / 2
+                for (m, n, o, p) in right_eyes[1:]:
+                    if m + o / 2 < right_eye_x_center:
+                        right_eye_x_center = m + o / 2
+                        right_eye_y_center = n + p / 2
+
+                if left_eye_x_center != right_eye_x_center:
+
+                    # Draw rectangles and circles in the original frame
+                    cv2.rectangle(
+                        frame,
+                        (x, x + w),
+                        (y, y + h),
+                        (0, 0, 255)
+                    )
+
+                    cv2.circle(
+                        frame,
+                        (left_eye_x_center, left_eye_y_center),
+                        1,
+                        (0, 255, 0),
+                        2
+                    )
+
+                    cv2.circle(
+                        frame,
+                        (right_eye_x_center, right_eye_y_center),
+                        1,
+                        (0, 255, 0),
+                        2
+                    )
+
+                    # Rotate the canvas
+                    rotation_degree = math.degrees(
+                        math.atan(
+                            float(right_eye_y_center - left_eye_y_center) / (right_eye_x_center - right_eye_y_center)
+                        )
+                    )
+
+                    if math.fabs(rotation_degree) < 15:
+                        w_m, h_m = normal.shape
+                        rotation_matrix = cv2.getRotationMatrix2D((h_m / 2, w_m / 2), rotation_degree, 1.0)
+                        normal = cv2.warpAffine(normal, rotation_matrix, (h_m, w_m))
 
