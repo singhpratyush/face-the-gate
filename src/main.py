@@ -207,10 +207,10 @@ def start_gate_keeper(camera_id):
                         n_lbhp_prediction += 1
 
                         # Do something with these predictions
-                        #    print('Eigen  Prediction - ', eigen_prediction)
-                        #    print('Fisher Prediction - ', fisher_prediction)
-                        #    print('LBHP   Prediction - ' , lbhp_prediction)
-                        #    print('\n\n')
+                        print('Eigen  Prediction - ', eigen_prediction)
+                        print('Fisher Prediction - ', fisher_prediction)
+                        print('LBHP   Prediction - ', lbhp_prediction)
+                        print('\n\n')
                         cv2.imshow('Face Closeup', new_face_closeup)
 
         cv2.imshow('Image', frame)
@@ -218,6 +218,8 @@ def start_gate_keeper(camera_id):
         # Terminate loop if user presses 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
             cap.release()
+            print ('--------------------------------------')
+            print ('Total Runs = ' + str(n_lbhp_prediction))
             print ('Average Eigen  Prediction = ' + str(sum_eigen_prediction / n_eigen_prediction))
             print ('Average Fisher Prediction = ' + str(sum_fisher_prediction / n_fisher_prediction))
             print ('Average LBHP   Prediction = ' + str(sum_lbhp_prediction / n_lbhp_prediction))
