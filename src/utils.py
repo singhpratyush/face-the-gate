@@ -36,7 +36,6 @@ def refresh_data():
     lbhp_recognizer.save(LBHP_RECOGNIZER_PATH)
 
 
-
 def start_gate_keeper(camera_id):
     # Open Video Capture
     cap = cv2.VideoCapture(camera_id)
@@ -143,13 +142,14 @@ def start_gate_keeper(camera_id):
                         2
                     )
 
-                    # Rotate the canvas
+                    # Get rotation degree
                     rotation_degree = math.degrees(
                         math.atan(
                             float(right_eye_y_center - left_eye_y_center) / (right_eye_x_center - right_eye_y_center)
                         )
                     )
 
+                    # Rotate the canvas and perform further operations
                     if math.fabs(rotation_degree) < 15:
                         w_m, h_m = normal.shape
                         rotation_matrix = cv2.getRotationMatrix2D((h_m / 2, w_m / 2), rotation_degree, 1.0)
@@ -175,8 +175,7 @@ def start_gate_keeper(camera_id):
                             "\nFisher Prediction - ", fisher_prediction,
                             "\nLBHP Prediction - ", lbhp_prediction
                         )
-
-        # End of 'if len(faces) ==  1' condition
+        cv2.imshow('Image', frame)
 
         # Terminate loop if user presses 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
