@@ -1,9 +1,8 @@
-import cv2
-from getopt import getopt, GetoptError
-import sys
-
 import math
+import sys
+from getopt import getopt, GetoptError
 
+import cv2
 
 # Path to cascades
 FRONTAL_FACE_CASCADE_PATH = "../rsc/cascades/haarcascade_frontalface_default.xml"
@@ -90,8 +89,8 @@ def get_new_data(camera_id, start_pos = 0, end_pos = 10, subject_id = 0):
                     # Draw rectangles and circles in the original frame
                     cv2.rectangle(
                         frame,
-                        (x, x + w),
-                        (y, y + h),
+                        (x, y),
+                        (x + w, y + h),
                         (0, 0, 255)
                     )
 

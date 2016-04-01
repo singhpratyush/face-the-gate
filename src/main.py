@@ -54,7 +54,7 @@ def start_gate_keeper(camera_id):
     # Open Video Capture
     cap = cv2.VideoCapture(camera_id)
 
-    # Check if camera is woring properly
+    # Check if camera is working properly
     if not cap.isOpened():
         return
 
@@ -85,7 +85,6 @@ def start_gate_keeper(camera_id):
     n_fisher_prediction = 0
     n_lbhp_prediction = 0
 
-
     # Start recognition task
     while True:
         ret, frame = cap.read()
@@ -107,7 +106,7 @@ def start_gate_keeper(camera_id):
             x, y, w, h = face
 
             close_up_face = cv2.equalizeHist(grey[y:y + h, x:x + h])
-            cv2.imshow('Close Up',  close_up_face)
+            cv2.imshow('Close Up', close_up_face)
             left_eyes = LEC.detectMultiScale(
                 close_up_face,
                 scaleFactor=1.6,
@@ -145,8 +144,8 @@ def start_gate_keeper(camera_id):
                     # Draw rectangles and circles in the original frame
                     cv2.rectangle(
                         frame,
-                        (x, x + w),
-                        (y, y + h),
+                        (x, y),
+                        (x + w, y + h),
                         (0, 0, 255)
                     )
 
@@ -193,7 +192,7 @@ def start_gate_keeper(camera_id):
                         new_x, new_y, new_w, new_h = new_faces[0]
                         new_face_closeup = normal[new_y:new_y + new_h, new_x:new_x + new_w]
 
-                        new_face_closeup = cv2.resize(new_face_closeup, (192,192))
+                        new_face_closeup = cv2.resize(new_face_closeup, (192, 192))
 
                         eigen_prediction = eigen_recognizer.predict(new_face_closeup)
                         fisher_prediction = fisher_recognizer.predict(new_face_closeup)
