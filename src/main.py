@@ -1,9 +1,9 @@
+import math
 import os
 import sys
 from getopt import getopt, GetoptError
 
 import cv2
-import math
 from numpy import array
 
 usage_text = './main.py [-r] [-c <camera_id>]'
@@ -76,6 +76,15 @@ def start_gate_keeper(camera_id):
     FC = cv2.CascadeClassifier(FRONTAL_FACE_CASCADE_PATH)
     REC = cv2.CascadeClassifier(RIGHT_EYE_CASCADE_PATH)
     LEC = cv2.CascadeClassifier(LEFT_EYE_CASCADE_PATH)
+
+    # For calculating average
+    sum_eigen_prediction = 0
+    sum_fisher_prediction = 0
+    sum_lbhp_prediction = 0
+    n_eigen_prediction = 0
+    n_fisher_prediction = 0
+    n_lbhp_prediction = 0
+
 
     # Start recognition task
     while True:
@@ -170,14 +179,18 @@ def start_gate_keeper(camera_id):
                         rotation_matrix = cv2.getRotationMatrix2D((h_m / 2, w_m / 2), rotation_degree, 1.0)
                         normal = cv2.warpAffine(normal, rotation_matrix, (h_m, w_m))
 
-                        new_x, new_y, new_w, new_h = new_face = FC.detectMultiScale(
+                        new_faces = FC.detectMultiScale(
                             normal,
                             scaleFactor=2,
                             minNeighbors=2,
                             minSize=(30, 30),
                             flags=cv2.cv.CV_HAAR_SCALE_IMAGE
-                        )[0]
+                        )
 
+                        if len(new_faces) == 0:
+                            continue
+
+                        new_x, new_y, new_w, new_h = new_faces[0]
                         new_face_closeup = normal[new_y:new_y + new_h, new_x:new_x + new_w]
 
                         new_face_closeup = cv2.resize(new_face_closeup, (192,192))
@@ -186,11 +199,19 @@ def start_gate_keeper(camera_id):
                         fisher_prediction = fisher_recognizer.predict(new_face_closeup)
                         lbhp_prediction = lbhp_recognizer.predict(new_face_closeup)
 
+                        # Increment averaging parameters
+                        sum_eigen_prediction += eigen_prediction[1]
+                        sum_fisher_prediction += fisher_prediction[1]
+                        sum_lbhp_prediction += lbhp_prediction[1]
+                        n_eigen_prediction += 1
+                        n_fisher_prediction += 1
+                        n_lbhp_prediction += 1
+
                         # Do something with these predictions
-                        print('Eigen Prediction - ', eigen_prediction)
-                        print('Fisher Prediction - ', fisher_prediction)
-                        print('LBHP Prediction - ' , lbhp_prediction)
-                        print('\n\n')
+                        #    print('Eigen  Prediction - ', eigen_prediction)
+                        #    print('Fisher Prediction - ', fisher_prediction)
+                        #    print('LBHP   Prediction - ' , lbhp_prediction)
+                        #    print('\n\n')
                         cv2.imshow('Face Closeup', new_face_closeup)
 
         cv2.imshow('Image', frame)
@@ -198,7 +219,9 @@ def start_gate_keeper(camera_id):
         # Terminate loop if user presses 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
             cap.release()
-            print('Quitting')
+            print ('Average Eigen  Prediction = ' + str(sum_eigen_prediction / n_eigen_prediction))
+            print ('Average Fisher Prediction = ' + str(sum_fisher_prediction / n_fisher_prediction))
+            print ('Average LBHP   Prediction = ' + str(sum_lbhp_prediction / n_lbhp_prediction))
             break
 
 
