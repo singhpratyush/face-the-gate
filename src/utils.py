@@ -1,10 +1,40 @@
 import math
+import os
 
 import cv2
 
+import src.constants
+
 
 def refresh_data():
-    return
+
+    # Get path to all images
+    path = 'rsc/images'
+    image_paths = [os.path.join(path, f) for f in os.listdir(path)]
+
+    # Initialize empty lists for these images and labels
+    images = []
+    labels = []
+
+    for path in image_paths:
+        images.append(cv2.imread(path, cv2.CV_LOAD_IMAGE_GRAYSCALE))
+        labels.append(int(os.path.split(path)[1].split("_")[0]))
+
+    # Create recognizers
+    eigen_recognizer = cv2.createEigenFaceRecognizer()
+    fisher_recognizer = cv2.createFisherFaceRecognizer()
+    lbhp_recognizer = cv2.createLBPHFaceRecognizer()
+
+    # Train recognizers
+    eigen_recognizer.train(images, labels)
+    fisher_recognizer.train(images, labels)
+    lbhp_recognizer.train(images, labels)
+
+    # Save results
+    eigen_recognizer.save(EIGEN_RECOGNIZER_PATH)
+    fisher_recognizer.save(FISHER_RECOGNIZER_PATH)
+    lbhp_recognizer.save(LBHP_RECOGNIZER_PATH)
+
 
 
 def start_gate_keeper(camera_id):
@@ -125,7 +155,7 @@ def start_gate_keeper(camera_id):
                         rotation_matrix = cv2.getRotationMatrix2D((h_m / 2, w_m / 2), rotation_degree, 1.0)
                         normal = cv2.warpAffine(normal, rotation_matrix, (h_m, w_m))
 
-                        new_x, new_y, new_w, new_h = new_face = faces = FC.detectMultiScale(
+                        new_x, new_y, new_w, new_h = new_face = FC.detectMultiScale(
                             normal,
                             scaleFactor=2,
                             minNeighbors=2,
@@ -140,8 +170,13 @@ def start_gate_keeper(camera_id):
                         lbhp_prediction = lbhp_recognizer.predict(new_face_closeup)
 
                         # Do something with these predictions
+                        print(
+                            "\nEigen Prediction - ", eigen_prediction,
+                            "\nFisher Prediction - ", fisher_prediction,
+                            "\nLBHP Prediction - ", lbhp_prediction
+                        )
 
-        # End for 'if len(faces) ==  1' condition
+        # End of 'if len(faces) ==  1' condition
 
         # Terminate loop if user presses 'q'
         if cv2.waitKey(1) & 0xFF == ord('q'):
