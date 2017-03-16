@@ -1,3 +1,4 @@
+#!/usr/bin/python
 import math
 import sys
 from getopt import getopt, GetoptError
